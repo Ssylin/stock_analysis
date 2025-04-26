@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>爆量股票查詢</title>
+</head>
+<body>
+    <h1>📈 爆量股票查詢系統</h1>
+
+    <form method="get">
+        <label>股票代號：</label>
+        <select name="stock_id">
+            <option value="">全部</option>
+            {% for sid in stock_ids %}
+            <option value="{{ sid }}" {% if sid == stock_id %}selected{% endif %}>{{ sid }}</option>
+            {% endfor %}
+        </select>
+
+        <label>開始日期：</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+
+        <label>結束日期：</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+        <br>
+        <label>
+            <input type="checkbox" name="spike_only" value="true" {% if spike_only %}checked{% endif %}>
+            只顯示爆量
+        </label>
+        <label>
+            <input type="checkbox" name="up_only" value="true" {% if up_only %}checked{% endif %}>
+            只顯示收紅（收盤 > 開盤）
+        </label>
+
+        <button type="submit">查詢</button>
+    </form>
+
+    <div>
+        📊 總筆數：{{ stocks|length }}　
+        🚨 爆量：{{ spike_count }}　
+        ✅ 正常：{{ normal_count }}
+    </div>
+    {% if valuation %}
+    <hr>
+    <h2>💰 合理價計算（{{ valuation.stock_id }}）</h2>
+    <p>最新 EPS：{{ valuation.eps }}</p>
+    <ul>
+        <li>便宜價（PE=10）：<strong>{{ valuation.cheap_price }}</strong></li>
+        <li>合理價（PE=15）：<strong>{{ valuation.fair_price }}</strong></li>
+        <li>昂貴價（PE=20）：<strong>{{ valuation.expensive_price }}</strong></li>
+    </ul>
+    {% endif %}
+    
+
+    <table border="1" style="margin-top: 20px;">
+        <thead>
+            <tr><th>代號</th><th>名稱</th><th>日期</th><th>開盤價</th><th>收盤價</th><th>今日量</th><th>5日均量</th><th>狀態</th><th>漲跌</th></tr>
+        </thead>
+        <tbody>
+        {% for row in stocks %}
+            <tr style="background-color: {{ 'pink' if row.is_spike else '#ecfff1' }}">
+                <td>{{ row.stock_id }}</td>
+                <td>{{ row.stock_name }}</td>
+                <td>{{ row.date }}</td>
+                <td>{{ row.open_price }}</td>
+                <td>{{ row.close_price }}</td>
+                <td>{{ row.today_volume }}</td>
+                <td>{{ row.avg_volume_5 }}</td>
+                <td>{{ '🚨 爆量' if row.is_spike else '✅ 正常' }}</td>
+                <td>
+                    {% if row.close_price is not none and row.open_price is not none %}
+                        {{ '🚨 漲' if row.close_price > row.open_price else '✅ 跌或平盤' }}
+                    {% else %}
+                        ❓ 資料不足
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
