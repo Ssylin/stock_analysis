@@ -1,4 +1,13 @@
-from flask import Flask, render_template, request
+# 替換舊的導入方式
+# from flask import Flask, render_template, request
+
+# 使用新的導入方式
+from flask import Flask
+from flask import render_template
+from flask import request
+from werkzeug.urls import url_quote_plus as url_quote  # 替代方案
+
+
 import os
 import psycopg2
 from psycopg2.extras import DictCursor
